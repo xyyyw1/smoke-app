@@ -15,42 +15,50 @@ jobs:
         with:
           node-version: 20
 
-      # 步骤1：将已安装的 WiX 加入 PATH
+      # 查找系统已安装的 WiX 目录并设置环境变量
       - name: 设置 WiX 环境变量
         run: |
-          $wixDir = "C:\Program Files (x86)\WiX Toolset v3.14\bin"
-          if (Test-Path $wixDir) {
-            echo "WIX=$wixDir" | Out-File -FilePath $env:GITHUB_ENV -Append
-            echo $wixDir | Out-File -FilePath $env:GITHUB_PATH -Append
-          } else {
-            $wixDir = "C:\Program Files (x86)\WiX Toolset v3.11\bin"  # 备用
-            if (Test-Path $wixDir) {
-              echo "WIX=$wixDir" | Out-File -FilePath $env:GITHUB_ENV -Append
-              echo $wixDir | Out-File -FilePath $env:GITHUB_PATH -Append
+          $wixPaths = @(
+            "C:\Program Files (x86)\WiX Toolset v3.14\bin",
+            "C:\Program Files (x86)\WiX Toolset v3.11\bin"
+          )
+          foreach ($p in $wixPaths) {
+            if (Test-Path $p) {
+              echo "TAURI_WIX_PATH=$p" | Out-File -FilePath $env:GITHUB_ENV -Append
+              echo $p | Out-File -FilePath $env:GITHUB_PATH -Append
+              Write-Host "✅ 使用 WiX 路径: $p"
+              break
             }
           }
         shell: pwsh
 
-      # 步骤2：验证 light.exe 可执行（可选，但可帮助调试）
-      - name: 检查 light.exe 是否可用
-        run: where light.exe
-        shell: cmd
-
-      # 步骤3：安装 Visual C++ Redistributable（light.exe 依赖）
+      # 安装 VC++ Redistributable（light.exe 运行所需）
       - name: 安装 VC++ Redistributable
         run: choco install vcredist-all -y --limit-output
-        continue-on-error: true  # 如果已安装则跳过错误
+        continue-on-error: true
 
-      # 步骤4：全局安装 pake-cli
+      # 全局安装 pake-cli
       - name: 安装 pake-cli
         run: npm install -g pake-cli
 
-      # 步骤5：构建应用
+      # 使用英文名称构建（避免 Unicode 问题）
       - name: 构建应用
         run: |
-          pake https://easterproject.pages.dev/ --name 烟感预警 --icon ./favicon.ico --targets windows
+          pake https://easterproject.pages.dev/ --name ygyj --icon ./favicon.ico --targets windows
 
-      # 步骤6：上传产物
+      # 将生成的 MSI 重命名为中文名称（可选）
+      - name: 重命名安装包为中文名
+        run: |
+          $msiFile = Get-ChildItem -Path "*.msi" -Filter "ygyj*.msi" | Select-Object -First 1
+          if ($msiFile) {
+            Rename-Item -Path $msiFile.FullName -NewName "烟感预警.msi"
+            Write-Host "✅ 已重命名为 烟感预警.msi"
+          } else {
+            Write-Host "⚠️ 未找到生成的 MSI 文件"
+          }
+        shell: pwsh
+
+      # 上传产物
       - name: 上传安装包
         uses: actions/upload-artifact@v4
         with:
