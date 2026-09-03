@@ -10,22 +10,22 @@ jobs:
       - name: 拉取代码
         uses: actions/checkout@v4
 
-      - name: 安装 Node.js
+      - name: 安装 Node.js（版本 20）
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20   # 关键修改：从 18 改为 20
 
       - name: 全局安装 pake-cli
         run: npm install -g pake-cli
 
-      - name: 使用 Pake 打包应用（Windows 平台）
+      - name: 使用 Pake 打包应用（Windows）
         run: |
           pake https://easterproject.pages.dev/ \
             --name 烟感预警 \
-            --icon https://raw.githubusercontent.com/xyyyw1/picture/main/favicon.ico \
+            --icon ./favicon.ico \
             --targets windows
 
-      - name: 上传安装包（Artifacts）
+      - name: 上传安装包
         uses: actions/upload-artifact@v4
         with:
           name: 烟感预警-windows
