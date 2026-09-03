@@ -11,7 +11,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 使用 Pake 打包应用
-        uses: tw93/Pake@v3
+        uses: xyyyw1/Pake@main   # ← 关键修改：使用你自己的 fork
         with:
           url: "https://easterproject.pages.dev/"
           name: "烟感预警"
