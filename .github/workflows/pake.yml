@@ -1,0 +1,18 @@
+name: Build 烟感预警 App
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 拉取代码
+        uses: actions/checkout@v4
+
+      - name: 使用 Pake 打包应用
+        uses: tw93/Pake@v3
+        with:
+          url: "https://easterproject.pages.dev/"
+          name: "烟感预警"
+          icon: "https://raw.githubusercontent.com/xyyyw1/picture/main/favicon.ico"
