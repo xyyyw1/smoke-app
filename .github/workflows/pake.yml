@@ -10,9 +10,23 @@ jobs:
       - name: 拉取代码
         uses: actions/checkout@v4
 
-      - name: 使用 Pake 打包应用
-        uses: xyyyw1/Pake@main   # ← 关键修改：使用你自己的 fork
+      - name: 安装 Node.js
+        uses: actions/setup-node@v4
         with:
-          url: "https://easterproject.pages.dev/"
-          name: "烟感预警"
-          icon: "https://raw.githubusercontent.com/xyyyw1/picture/main/favicon.ico"
+          node-version: 18
+
+      - name: 全局安装 pake-cli
+        run: npm install -g pake-cli
+
+      - name: 使用 Pake 打包应用（Windows 平台）
+        run: |
+          pake https://easterproject.pages.dev/ \
+            --name 烟感预警 \
+            --icon https://raw.githubusercontent.com/xyyyw1/picture/main/favicon.ico \
+            --targets windows
+
+      - name: 上传安装包（Artifacts）
+        uses: actions/upload-artifact@v4
+        with:
+          name: 烟感预警-windows
+          path: 烟感预警*.msi
